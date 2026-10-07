@@ -1,0 +1,1 @@
+ /Users/siriusblack/IntegratedTask/Tic_One_Admin-1/build/a9d516957f4fd540c0a42636746f8450/dart_build_result.json:  /Users/siriusblack/Flutter\ SDK/flutter/bin/cache/dart-sdk/version /Users/siriusblack/IntegratedTask/Tic_One_Admin-1/.dart_tool/package_config.json /Users/siriusblack/IntegratedTask/Tic_One_Admin-1/pubspec.yaml
