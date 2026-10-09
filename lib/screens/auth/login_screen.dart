@@ -11,10 +11,16 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+// One-tap demo login: credentials are injected at build time, never committed.
+// flutter run -d chrome --dart-define=DEMO_EMAIL=... --dart-define=DEMO_PASSWORD=...
+const String _demoEmail = String.fromEnvironment('DEMO_EMAIL');
+const String _demoPassword = String.fromEnvironment('DEMO_PASSWORD');
+const bool _demoLoginEnabled = _demoEmail != '' && _demoPassword != '';
+
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController(text: 'admin@ticone.com');
-  final _passwordCtrl = TextEditingController(text: 'Admin@123');
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
 
   @override
@@ -26,12 +32,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
+    await _login(_emailCtrl.text.trim(), _passwordCtrl.text.trim());
+  }
 
+  void _handleDemoLogin() async {
+    _emailCtrl.text = _demoEmail;
+    _passwordCtrl.text = _demoPassword;
+    await _login(_demoEmail, _demoPassword);
+  }
+
+  Future<void> _login(String email, String password) async {
     final auth = context.read<AuthProvider>();
-    final success = await auth.login(
-      _emailCtrl.text.trim(),
-      _passwordCtrl.text.trim(),
-    );
+    final success = await auth.login(email, password);
 
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -95,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.center,
                       child: Text(
                         'T1',
-                        style: GoogleFonts.outfit(
+                        style: GoogleFonts.plusJakartaSans(
                           color: Colors.white,
                           fontWeight: FontWeight.w900,
                           fontSize: 26,
@@ -107,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'TicOne Admin Portal',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.plusJakartaSans(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -194,33 +206,27 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, fontSize: 14),
                           ),
                   ),
-                  const SizedBox(height: 20),
 
-                  // Demo hint box
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.bgDark,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppTheme.border),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline, color: AppTheme.secondary, size: 18),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Default Admin: admin@ticone.com / Admin@123',
-                            style: GoogleFonts.plusJakartaSans(
-                              color: AppTheme.textMuted,
-                              fontSize: 11,
-                              
-                            ),
-                          ),
+                  if (_demoLoginEnabled) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: auth.isLoading ? null : _handleDemoLogin,
+                      icon: const Icon(Icons.flash_on_rounded, color: AppTheme.secondary, size: 18),
+                      label: Text(
+                        'One-Tap Demo Login',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
                         ),
-                      ],
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: const BorderSide(color: AppTheme.border),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

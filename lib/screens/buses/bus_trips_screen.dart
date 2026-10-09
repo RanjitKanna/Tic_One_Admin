@@ -8,7 +8,6 @@ import '../../providers/data_providers.dart';
 import '../../widgets/admin_header.dart';
 import '../../widgets/confirmation_dialog.dart';
 import '../../widgets/data_table_card.dart';
-import '../../widgets/status_badge.dart';
 
 class BusTripsScreen extends StatefulWidget {
   const BusTripsScreen({super.key});

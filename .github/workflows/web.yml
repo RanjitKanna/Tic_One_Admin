@@ -1,0 +1,54 @@
+name: Admin Web Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  web:
+    name: Admin Web Release
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.2"
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Build Web
+        run: flutter build web --release --dart-define=IS_PRODUCTION=true
+
+      - name: Verify web build output
+        run: |
+          for f in index.html flutter_bootstrap.js main.dart.js manifest.json vercel.json favicon.png; do
+            test -e "build/web/$f" || { echo "::error::build/web/$f is missing"; exit 1; }
+          done
+
+      - name: Upload Web
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-web-release
+          path: build/web
+
+      - name: Deploy to Vercel
+        if: ${{ env.VERCEL_TOKEN != '' }}
+        run: npx --yes vercel@latest deploy build/web --prod --yes --token="$VERCEL_TOKEN"

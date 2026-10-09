@@ -261,10 +261,20 @@ class _OperatorsScreenState extends State<OperatorsScreen> {
                             ),
                           ),
                           DataCell(
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppTheme.error),
-                              tooltip: 'Delete Operator',
-                              onPressed: () => _confirmDeleteOperator(context, op),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit_outlined, size: 18, color: AppTheme.primary),
+                                  tooltip: 'Edit Operator',
+                                  onPressed: () => _showOperatorFormDialog(context, op: op),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppTheme.error),
+                                  tooltip: 'Delete Operator',
+                                  onPressed: () => _confirmDeleteOperator(context, op),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -280,14 +290,15 @@ class _OperatorsScreenState extends State<OperatorsScreen> {
     );
   }
 
-  void _showOperatorFormDialog(BuildContext context) {
+  void _showOperatorFormDialog(BuildContext context, {BusOperatorModel? op}) {
     final formKey = GlobalKey<FormState>();
-    final nameCtrl = TextEditingController();
-    final logoCtrl = TextEditingController();
-    final phoneCtrl = TextEditingController();
-    final emailCtrl = TextEditingController();
-    final policyCtrl = TextEditingController(text: 'Full refund 12 hours before departure; 50% refund within 6-12 hours.');
-    double rating = 4.7;
+    final isEdit = op != null;
+    final nameCtrl = TextEditingController(text: op?.name ?? '');
+    final logoCtrl = TextEditingController(text: op?.logoUrl ?? '');
+    final phoneCtrl = TextEditingController(text: op?.contactNumber ?? '');
+    final emailCtrl = TextEditingController(text: op?.email ?? '');
+    final policyCtrl = TextEditingController(text: op?.cancellationPolicy ?? 'Full refund 12 hours before departure; 50% refund within 6-12 hours.');
+    double rating = op?.rating ?? 4.7;
 
     showDialog(
       context: context,
@@ -404,7 +415,7 @@ class _OperatorsScreenState extends State<OperatorsScreen> {
                     backgroundColor: AppTheme.primary,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
-                  child: Text('Save Operator', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white)),
+                  child: Text(isEdit ? 'Save Changes' : 'Save Operator', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white)),
                   onPressed: () async {
                     if (formKey.currentState?.validate() != true) return;
                     Navigator.pop(ctx);
@@ -418,12 +429,13 @@ class _OperatorsScreenState extends State<OperatorsScreen> {
                       'rating': rating,
                     };
 
-                    final success = await context.read<BusProvider>().createOperator(data);
+                    final provider = context.read<BusProvider>();
+                    final success = isEdit ? await provider.updateOperator(op.id, data) : await provider.createOperator(data);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: success ? AppTheme.success : AppTheme.error,
-                          content: Text(success ? 'Operator registered successfully!' : 'Failed to register operator.'),
+                          content: Text(success ? (isEdit ? 'Operator updated successfully!' : 'Operator registered successfully!') : (isEdit ? 'Failed to update operator.' : 'Failed to register operator.')),
                         ),
                       );
                     }

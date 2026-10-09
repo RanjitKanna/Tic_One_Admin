@@ -259,6 +259,13 @@ class _UserDetailsDialog extends StatelessWidget {
             final busBookings = (data['busBookings'] as List?) ?? [];
             final payments = (data['payments'] as List?) ?? [];
 
+            final isActive = user['isActive'] != false;
+            final role = (user['role'] ?? 'user').toString();
+            final createdAt = DateTime.tryParse(user['createdAt']?.toString() ?? '');
+            final totalSpent = [...movieBookings, ...busBookings]
+                .where((b) => b['bookingStatus'] != 'cancelled')
+                .fold<double>(0, (sum, b) => sum + ((b['amount'] as num?)?.toDouble() ?? 0));
+
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -292,6 +299,33 @@ class _UserDetailsDialog extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
+
+                // Profile details
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _DetailTile(label: 'USER ID', value: '#${user['id']}'),
+                    _DetailTile(label: 'PHONE', value: user['phone']?.toString() ?? '—'),
+                    _DetailTile(
+                      label: 'ROLE',
+                      value: role.toUpperCase(),
+                      valueColor: role == 'admin' ? AppTheme.primary : null,
+                    ),
+                    _DetailTile(
+                      label: 'STATUS',
+                      value: isActive ? 'Active' : 'Disabled',
+                      valueColor: isActive ? AppTheme.success : AppTheme.error,
+                    ),
+                    _DetailTile(
+                      label: 'JOINED',
+                      value: createdAt != null ? DateFormat('dd MMM yyyy').format(createdAt.toLocal()) : 'N/A',
+                    ),
+                    _DetailTile(label: 'BOOKINGS', value: '${movieBookings.length + busBookings.length}'),
+                    _DetailTile(label: 'TOTAL SPENT', value: '₹${totalSpent.toStringAsFixed(0)}'),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 const Divider(color: AppTheme.border),
                 const SizedBox(height: 12),
 
@@ -379,6 +413,38 @@ class _UserDetailsDialog extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _DetailTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  const _DetailTile({required this.label, required this.value, this.valueColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppTheme.bgSurface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: valueColor ?? AppTheme.textPrimary),
+          ),
+        ],
       ),
     );
   }

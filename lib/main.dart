@@ -62,7 +62,7 @@ class AuthGate extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [AppTheme.primary, AppTheme.accentOrange],
+                    colors: [AppTheme.primaryGradientStart, AppTheme.accentPurple],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
@@ -78,7 +78,7 @@ class AuthGate extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 'TicOne Admin Console',
-                style: GoogleFonts.outfit(
+                style: GoogleFonts.plusJakartaSans(
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.w800,

@@ -116,14 +116,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // Top KPI Cards Grid (4x2 responsive)
             LayoutBuilder(
               builder: (ctx, constraints) {
-                final crossAxisCount = constraints.maxWidth > 1200 ? 4 : (constraints.maxWidth > 700 ? 2 : 1);
-                return GridView.count(
-                  crossAxisCount: crossAxisCount,
+                final crossAxisCount = constraints.maxWidth > 900 ? 4 : (constraints.maxWidth > 560 ? 2 : 1);
+                return GridView(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.8,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 14,
+                    mainAxisSpacing: 14,
+                    // Fixed card height so cards don't grow tall on wide screens.
+                    mainAxisExtent: 124,
+                  ),
                   children: [
                     StatCard(
                       title: 'Total Revenue',

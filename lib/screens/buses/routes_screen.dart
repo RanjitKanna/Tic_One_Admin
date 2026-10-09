@@ -224,10 +224,20 @@ class _RoutesScreenState extends State<RoutesScreen> {
                             ),
                           ),
                           DataCell(
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppTheme.error),
-                              tooltip: 'Delete Route',
-                              onPressed: () => _confirmDeleteRoute(context, route),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit_outlined, size: 18, color: AppTheme.primary),
+                                  tooltip: 'Edit Route',
+                                  onPressed: () => _showRouteFormDialog(context, route: route),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppTheme.error),
+                                  tooltip: 'Delete Route',
+                                  onPressed: () => _confirmDeleteRoute(context, route),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -243,13 +253,14 @@ class _RoutesScreenState extends State<RoutesScreen> {
     );
   }
 
-  void _showRouteFormDialog(BuildContext context) {
+  void _showRouteFormDialog(BuildContext context, {BusRouteModel? route}) {
     final formKey = GlobalKey<FormState>();
-    final sourceCtrl = TextEditingController();
-    final destCtrl = TextEditingController();
-    final distCtrl = TextEditingController(text: '350');
-    final durCtrl = TextEditingController(text: '360');
-    bool isPopular = true;
+    final isEdit = route != null;
+    final sourceCtrl = TextEditingController(text: route?.sourceCity ?? '');
+    final destCtrl = TextEditingController(text: route?.destinationCity ?? '');
+    final distCtrl = TextEditingController(text: route != null ? '${route.distanceKm}' : '350');
+    final durCtrl = TextEditingController(text: route != null ? '${route.estimatedDurationMins}' : '360');
+    bool isPopular = route?.isPopular ?? true;
 
     showDialog(
       context: context,
@@ -266,7 +277,7 @@ class _RoutesScreenState extends State<RoutesScreen> {
                 children: [
                   const Icon(Icons.add_road_rounded, color: AppTheme.primary),
                   const SizedBox(width: 10),
-                  Text('Create Bus Corridor Route', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text(isEdit ? 'Edit Bus Corridor Route' : 'Create Bus Corridor Route', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white)),
                 ],
               ),
               content: SizedBox(
@@ -385,12 +396,13 @@ class _RoutesScreenState extends State<RoutesScreen> {
                       'isPopular': isPopular,
                     };
 
-                    final success = await context.read<BusProvider>().createRoute(data);
+                    final provider = context.read<BusProvider>();
+                    final success = isEdit ? await provider.updateRoute(route.id, data) : await provider.createRoute(data);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: success ? AppTheme.success : AppTheme.error,
-                          content: Text(success ? 'Route registered successfully!' : 'Failed to register route.'),
+                          content: Text(success ? (isEdit ? 'Route updated successfully!' : 'Route registered successfully!') : (isEdit ? 'Failed to update route.' : 'Failed to register route.')),
                         ),
                       );
                     }

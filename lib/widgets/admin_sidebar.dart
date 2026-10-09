@@ -53,7 +53,7 @@ class AdminSidebar extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(
                     'T1',
-                    style: GoogleFonts.outfit(
+                    style: GoogleFonts.plusJakartaSans(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
                       fontSize: 18,
@@ -71,7 +71,7 @@ class AdminSidebar extends StatelessWidget {
                           children: [
                             Text(
                               'TIC',
-                              style: GoogleFonts.outfit(
+                              style: GoogleFonts.plusJakartaSans(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 18,
@@ -80,7 +80,7 @@ class AdminSidebar extends StatelessWidget {
                             ),
                             Text(
                               'ONE',
-                              style: GoogleFonts.outfit(
+                              style: GoogleFonts.plusJakartaSans(
                                 color: AppTheme.primary,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 18,

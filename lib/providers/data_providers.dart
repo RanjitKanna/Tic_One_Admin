@@ -509,6 +509,15 @@ class BusProvider extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> updateOperator(int id, Map<String, dynamic> data) async {
+    final res = await _apiService.updateBusOperator(id, data);
+    if (res.isSuccess) {
+      await fetchOperators();
+      return true;
+    }
+    return false;
+  }
+
   Future<bool> deleteOperator(int id) async {
     final res = await _apiService.deleteBusOperator(id);
     if (res.isSuccess) {
@@ -520,6 +529,15 @@ class BusProvider extends ChangeNotifier {
 
   Future<bool> createBus(Map<String, dynamic> data) async {
     final res = await _apiService.createBus(data);
+    if (res.isSuccess) {
+      await fetchBuses();
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> updateBus(int id, Map<String, dynamic> data) async {
+    final res = await _apiService.updateBus(id, data);
     if (res.isSuccess) {
       await fetchBuses();
       return true;
@@ -545,6 +563,15 @@ class BusProvider extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> updateRoute(int id, Map<String, dynamic> data) async {
+    final res = await _apiService.updateBusRoute(id, data);
+    if (res.isSuccess) {
+      await fetchRoutes();
+      return true;
+    }
+    return false;
+  }
+
   Future<bool> deleteRoute(int id) async {
     final res = await _apiService.deleteBusRoute(id);
     if (res.isSuccess) {
@@ -556,6 +583,15 @@ class BusProvider extends ChangeNotifier {
 
   Future<bool> createTrip(Map<String, dynamic> data) async {
     final res = await _apiService.createBusTrip(data);
+    if (res.isSuccess) {
+      await fetchTrips();
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> updateTrip(int id, Map<String, dynamic> data) async {
+    final res = await _apiService.updateBusTrip(id, data);
     if (res.isSuccess) {
       await fetchTrips();
       return true;

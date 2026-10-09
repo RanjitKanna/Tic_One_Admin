@@ -114,6 +114,7 @@ class _SeatEditorScreenState extends State<SeatEditorScreen> {
                 Expanded(
                   child: DropdownButtonFormField<int>(
                     value: _selectedTheaterId,
+                    isExpanded: true,
                     dropdownColor: AppTheme.bgCard,
                     decoration: const InputDecoration(labelText: 'Select Theater Venue'),
                     items: theaterProvider.theaters.map((t) => DropdownMenuItem(value: t.id, child: Text(t.name, overflow: TextOverflow.ellipsis))).toList(),
@@ -130,9 +131,10 @@ class _SeatEditorScreenState extends State<SeatEditorScreen> {
                 Expanded(
                   child: DropdownButtonFormField<int>(
                     value: _selectedScreenId,
+                    isExpanded: true,
                     dropdownColor: AppTheme.bgCard,
                     decoration: const InputDecoration(labelText: 'Select Screen'),
-                    items: screens.map((s) => DropdownMenuItem(value: s.id, child: Text(s.screenName))).toList(),
+                    items: screens.map((s) => DropdownMenuItem(value: s.id, child: Text(s.screenName, overflow: TextOverflow.ellipsis))).toList(),
                     onChanged: (v) {
                       setState(() {
                         _selectedScreenId = v;
@@ -146,10 +148,11 @@ class _SeatEditorScreenState extends State<SeatEditorScreen> {
                 Expanded(
                   child: DropdownButtonFormField<int?>(
                     value: _selectedShowId,
+                    isExpanded: true,
                     dropdownColor: AppTheme.bgCard,
                     decoration: const InputDecoration(labelText: 'Live Show Occupancy (Optional)'),
                     items: [
-                      const DropdownMenuItem(value: null, child: Text('Design Mode (No live locks)')),
+                      const DropdownMenuItem(value: null, child: Text('Design Mode (No live locks)', overflow: TextOverflow.ellipsis)),
                       ...showProvider.shows
                           .where((s) => _selectedScreenId == null || s.screenId == _selectedScreenId)
                           .map((s) => DropdownMenuItem(value: s.id, child: Text('${s.movieTitle} (${s.showTimeFormatted})', overflow: TextOverflow.ellipsis))),

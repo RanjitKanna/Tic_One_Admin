@@ -314,6 +314,11 @@ class _BusesScreenState extends State<BusesScreen> {
                                   onPressed: () => _showBusSeatLayoutDialog(context, bus),
                                 ),
                                 IconButton(
+                                  icon: const Icon(Icons.edit_outlined, size: 18, color: AppTheme.primary),
+                                  tooltip: 'Edit Bus',
+                                  onPressed: () => _showBusFormDialog(context, operators: context.read<BusProvider>().operators, bus: bus),
+                                ),
+                                IconButton(
                                   icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppTheme.error),
                                   tooltip: 'Delete Bus',
                                   onPressed: () => _confirmDeleteBus(context, bus),
@@ -334,7 +339,7 @@ class _BusesScreenState extends State<BusesScreen> {
     );
   }
 
-  void _showBusFormDialog(BuildContext context, {required List<BusOperatorModel> operators}) {
+  void _showBusFormDialog(BuildContext context, {required List<BusOperatorModel> operators, BusModel? bus}) {
     if (operators.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please add at least one Bus Operator first!')),
@@ -343,18 +348,28 @@ class _BusesScreenState extends State<BusesScreen> {
     }
 
     final formKey = GlobalKey<FormState>();
-    final nameCtrl = TextEditingController();
-    final numberCtrl = TextEditingController();
-    int operatorId = operators.first.id;
-    String busType = 'AC Sleeper 2+1';
-    String category = 'Premium';
-    String deckType = 'single';
-    bool isAc = true;
-    bool liveTracking = true;
-    int totalSeats = 30;
-    final List<String> selectedAmenities = ['WiFi', 'Charging Point', 'Water Bottle', 'Blanket'];
+    final isEdit = bus != null;
+    final nameCtrl = TextEditingController(text: bus?.busName ?? '');
+    final numberCtrl = TextEditingController(text: bus?.busNumber ?? '');
+    int operatorId = operators.any((o) => o.id == bus?.operatorId) ? bus!.operatorId : operators.first.id;
+    String busType = bus?.busType.isNotEmpty == true ? bus!.busType : 'AC Sleeper 2+1';
+    String category = bus?.category.isNotEmpty == true ? bus!.category : 'Premium';
+    String deckType = bus?.deckType.isNotEmpty == true ? bus!.deckType : 'single';
+    bool isAc = bus?.isAc ?? true;
+    bool liveTracking = bus?.liveTrackingAvailable ?? true;
+    int totalSeats = bus?.totalSeats ?? 30;
+    final List<String> selectedAmenities = bus != null
+        ? bus.amenities.map((a) => a.toString()).toList()
+        : ['WiFi', 'Charging Point', 'Water Bottle', 'Blanket'];
 
-    final availableAmenities = ['WiFi', 'Charging Point', 'Water Bottle', 'Blanket', 'Reading Light', 'Emergency Exit', 'Pillow', 'CCTV'];
+    final availableAmenities = {
+      'WiFi', 'Charging Point', 'Water Bottle', 'Blanket', 'Reading Light', 'Emergency Exit', 'Pillow', 'CCTV',
+      ...selectedAmenities,
+    }.toList();
+    final busTypes = {
+      'AC Sleeper 2+1', 'Volvo Multi-Axle Semi-Sleeper', 'Bharat Benz AC Sleeper', 'Non-AC Sleeper (2+1)', 'Luxury Seater (2+2)', busType,
+    }.toList();
+    final categories = {'Premium', 'Executive', 'Royal Class', 'Economy', category}.toList();
 
     showDialog(
       context: context,
@@ -372,7 +387,7 @@ class _BusesScreenState extends State<BusesScreen> {
                 children: [
                   const Icon(Icons.directions_bus_rounded, color: AppTheme.primary),
                   const SizedBox(width: 10),
-                  Text('Add New Bus', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white)),
+                  Text(isEdit ? 'Edit Bus' : 'Add New Bus', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white)),
                 ],
               ),
               content: SizedBox(
@@ -461,13 +476,7 @@ class _BusesScreenState extends State<BusesScreen> {
                                   fillColor: AppTheme.bgDark,
                                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
-                                items: const [
-                                  DropdownMenuItem(value: 'AC Sleeper 2+1', child: Text('AC Sleeper (2+1)')),
-                                  DropdownMenuItem(value: 'Volvo Multi-Axle Semi-Sleeper', child: Text('Volvo Multi-Axle Semi-Sleeper')),
-                                  DropdownMenuItem(value: 'Bharat Benz AC Sleeper', child: Text('Bharat Benz AC Sleeper')),
-                                  DropdownMenuItem(value: 'Non-AC Sleeper (2+1)', child: Text('Non-AC Sleeper (2+1)')),
-                                  DropdownMenuItem(value: 'Luxury Seater (2+2)', child: Text('Luxury Seater (2+2)')),
-                                ],
+                                items: busTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                                 onChanged: (val) {
                                   if (val != null) setModalState(() => busType = val);
                                 },
@@ -485,12 +494,7 @@ class _BusesScreenState extends State<BusesScreen> {
                                   fillColor: AppTheme.bgDark,
                                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
-                                items: const [
-                                  DropdownMenuItem(value: 'Premium', child: Text('Premium')),
-                                  DropdownMenuItem(value: 'Executive', child: Text('Executive')),
-                                  DropdownMenuItem(value: 'Royal Class', child: Text('Royal Class')),
-                                  DropdownMenuItem(value: 'Economy', child: Text('Economy')),
-                                ],
+                                items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                                 onChanged: (val) {
                                   if (val != null) setModalState(() => category = val);
                                 },
@@ -615,7 +619,7 @@ class _BusesScreenState extends State<BusesScreen> {
                     backgroundColor: AppTheme.primary,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
-                  child: Text('Create Bus', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white)),
+                  child: Text(isEdit ? 'Save Changes' : 'Create Bus', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: Colors.white)),
                   onPressed: () async {
                     if (formKey.currentState?.validate() != true) return;
                     Navigator.pop(ctx);
@@ -633,12 +637,15 @@ class _BusesScreenState extends State<BusesScreen> {
                       'liveTrackingAvailable': liveTracking,
                     };
 
-                    final success = await context.read<BusProvider>().createBus(data);
+                    final provider = context.read<BusProvider>();
+                    final success = isEdit ? await provider.updateBus(bus.id, data) : await provider.createBus(data);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: success ? AppTheme.success : AppTheme.error,
-                          content: Text(success ? 'Bus added successfully!' : 'Failed to add bus.'),
+                          content: Text(success
+                              ? (isEdit ? 'Bus updated successfully!' : 'Bus added successfully!')
+                              : (isEdit ? 'Failed to update bus.' : 'Failed to add bus.')),
                         ),
                       );
                     }

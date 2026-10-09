@@ -1,5 +1,8 @@
 class ApiConfig {
-  static String baseUrl = 'http://localhost:8080/api/admin';
+  static const String productionServerUrl =
+      'https://ticonemiddleware-production.up.railway.app';
+
+  static String baseUrl = '$productionServerUrl/api/admin';
 
   // Endpoints
   static String login = '$baseUrl/auth/login';

@@ -326,6 +326,10 @@ class _MoviesScreenState extends State<MoviesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Movie deleted successfully'), backgroundColor: AppTheme.success),
         );
+      } else if (!success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to delete movie'), backgroundColor: AppTheme.error),
+        );
       }
     }
   }
@@ -437,6 +441,13 @@ class _MovieFormDialogState extends State<_MovieFormDialog> {
           backgroundColor: AppTheme.success,
         ),
       );
+    } else if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.error ?? (widget.movie != null ? 'Failed to update movie' : 'Failed to add movie')),
+          backgroundColor: AppTheme.error,
+        ),
+      );
     }
   }
 
@@ -489,7 +500,13 @@ class _MovieFormDialogState extends State<_MovieFormDialog> {
                         Expanded(
                           child: TextFormField(
                             controller: _releaseDateCtrl,
-                            decoration: const InputDecoration(labelText: 'Release Date (YYYY-MM-DD)'),
+                            decoration: const InputDecoration(labelText: 'Release Date (YYYY-MM-DD) *'),
+                            validator: (v) {
+                              final value = v?.trim() ?? '';
+                              final valid = RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value) &&
+                                  DateTime.tryParse(value) != null;
+                              return valid ? null : 'Use YYYY-MM-DD';
+                            },
                           ),
                         ),
                       ],
